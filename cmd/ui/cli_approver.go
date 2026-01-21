@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"AgentEngine/pkg/engine/api"
+	"AgentEngine/pkg/logger"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.org/x/term"
@@ -24,6 +25,11 @@ func NewCLIApprover() *CLIApprover {
 	return &CLIApprover{
 		Reader: bufio.NewReader(os.Stdin),
 	}
+}
+
+func hitlDebugEnabled() bool {
+	v := os.Getenv("HITL_DEBUG")
+	return v != "" && v != "0" && v != "false"
 }
 
 // RequestApproval prompts the user with an interactive approval UI
@@ -66,26 +72,41 @@ func (c *CLIApprover) RequestApproval(ctx context.Context, req api.ApprovalPaylo
 
 	// Try interactive mode first
 	if term.IsTerminal(int(os.Stdin.Fd())) {
+		if hitlDebugEnabled() {
+			logger.Info("hitl", "RequestApproval using interactive bubbletea UI")
+		}
 		return c.interactiveApproval(req)
 	}
 
 	// Fallback to simple prompt
+	if hitlDebugEnabled() {
+		logger.Info("hitl", "RequestApproval using simple stdin prompt (non-tty)")
+	}
 	return c.simpleApproval(req)
 }
 
 // interactiveApproval uses bubbletea for selection
 func (c *CLIApprover) interactiveApproval(req api.ApprovalPayload) (api.Decision, bool, error) {
+	if hitlDebugEnabled() {
+		logger.Info("hitl", "interactiveApproval start", map[string]interface{}{"request_id": req.RequestID, "tool_call_id": req.ToolCallID})
+	}
 	model := initialApprovalModel(req)
 	p := tea.NewProgram(model)
 
 	// Run the program
 	finalModel, err := p.Run()
 	if err != nil {
+		if hitlDebugEnabled() {
+			logger.Info("hitl", "interactiveApproval failed; falling back to simple prompt", map[string]interface{}{"err": err.Error()})
+		}
 		return c.simpleApproval(req)
 	}
 
 	m, ok := finalModel.(approvalModel)
 	if !ok || m.cancelled {
+		if hitlDebugEnabled() {
+			logger.Info("hitl", "interactiveApproval cancelled or unexpected model", map[string]interface{}{"ok": ok, "cancelled": m.cancelled})
+		}
 		return api.Decision{
 			Kind:       api.DecisionReject,
 			RequestID:  req.RequestID,
@@ -93,6 +114,9 @@ func (c *CLIApprover) interactiveApproval(req api.ApprovalPayload) (api.Decision
 		}, false, nil
 	}
 
+	if hitlDebugEnabled() {
+		logger.Info("hitl", "interactiveApproval selected", map[string]interface{}{"selected": m.selected})
+	}
 	return c.makeDecision(req, m.selected)
 }
 

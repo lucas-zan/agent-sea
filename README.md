@@ -35,7 +35,15 @@ Most agent frameworks are heavy, Python-first, or tightly coupled to specific pr
 
 ## Installation
 
-### Option 1: Download Binary (Recommended)
+### Option 1: Quick Install (Recommended)
+
+Run this command in your terminal to download and set up `sea` automatically:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/lucas-zan/agent-sea/main/install.sh | bash
+```
+
+### Option 2: Manual Download
 
 1. Go to the [Releases](https://github.com/lucas-zan/agent-sea/releases) page.
 2. Download the binary for your OS (Windows, macOS, Linux).

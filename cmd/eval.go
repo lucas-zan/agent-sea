@@ -31,7 +31,7 @@ var (
 )
 
 func init() {
-	evalCmd.Flags().StringVar(&evalProjectFlag, "project", "诡世禁忌", "Novel project name under workspace/novel/")
+	evalCmd.Flags().StringVar(&evalProjectFlag, "project", "诡世_被遗忘的人", "Novel project name under workspace/novel/")
 	evalCmd.Flags().StringVar(&evalOutlineFlag, "outline", "", "Path to outline markdown (default: workspace/novel/<project>/outline.md)")
 	evalCmd.Flags().StringVar(&evalOutDirFlag, "out", "workspace/eval", "Directory to write evaluation outputs")
 	rootCmd.AddCommand(evalCmd)
@@ -261,4 +261,3 @@ func summarizeEvents(path string) eventStats {
 	}
 	return stats
 }
-

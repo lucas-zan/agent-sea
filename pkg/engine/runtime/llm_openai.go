@@ -331,10 +331,10 @@ func (s *openAIStream) Recv(ctx context.Context) (LLMChunk, error) {
 		}
 
 		var chunk openAIStreamChunk
-		logger.Info("LLM", "Received chunk", map[string]interface{}{
-			"service": "agent-engine",
-			"chunk":   data,
-		})
+		// logger.Info("LLM", "Received chunk", map[string]interface{}{
+		// 	"service": "agent-engine",
+		// 	"chunk":   data,
+		// })
 		if err := json.Unmarshal([]byte(data), &chunk); err != nil {
 			logger.Error("LLM", "Failed to unmarshal chunk", map[string]interface{}{
 				"service": "agent-engine",
