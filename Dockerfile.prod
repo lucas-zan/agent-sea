@@ -1,0 +1,56 @@
+# Agent Engine Production Dockerfile
+# Multi-stage build for minimal image size
+
+# ==================== Build Stage ====================
+FROM golang:1.24-bookworm AS builder
+
+WORKDIR /build
+
+# Copy go mod files first for better caching
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build binary with optimizations
+ARG VERSION=dev
+ARG BUILD_TIME
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags "-s -w -X main.Version=${VERSION} -X main.BuildTime=${BUILD_TIME}" \
+    -o sea .
+
+# ==================== Runtime Stage ====================
+FROM debian:bookworm-slim
+
+# Install Python and Node.js runtime for skills
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    nodejs \
+    npm \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/python3 /usr/bin/python
+
+# Create non-root user
+RUN useradd -m -s /bin/bash agent
+
+WORKDIR /app
+
+# Copy binary from builder
+# Copy binary from builder
+COPY --from=builder /build/sea /app/sea
+
+# Copy skills directory
+COPY --from=builder /build/skills /app/skills
+
+# Set ownership
+RUN chown -R agent:agent /app
+
+USER agent
+
+# Expose port if needed
+# EXPOSE 8080
+
+ENTRYPOINT ["/app/sea"]

@@ -1,0 +1,27 @@
+services:
+  dev:
+    build: .
+    container_name: sea-dev
+    volumes:
+      # Mount local code into container
+      - .:/app
+      # Persist Go modules cache
+      - go-modules:/go/pkg/mod
+    working_dir: /app
+    # Keep container running
+    tty: true
+    stdin_open: true
+    # Environment variables for LLM configuration
+    environment:
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_BASE_URL=${LLM_BASE_URL:-https://api.openai.com/v1}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+    # Also load from .env file if exists
+    env_file:
+      - path: .env
+        required: false
+
+volumes:
+  go-modules:
+
+

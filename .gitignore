@@ -1,0 +1,39 @@
+# Build artifacts
+/bin/
+/sea
+/docs
+/AgentEngine
+/chat
+/hello-world
+/char-create
+/file-*
+/skills/*
+# docs/
+logs/
+# Local history scratchpad
+/history/
+# Temporary workspace for ad-hoc tooling
+.tmp/
+# Workspace (runtime data)
+/workspace/*.json
+/workspace/*.log
+/workspace/*
+# !workspace/README.md
+
+# Environment (contains secrets)
+.env
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+AGENTS.md
+
+# Python cache
+__pycache__/
+.gocache/
+.gomodcache/
+.gotmp/
+*.pyc
