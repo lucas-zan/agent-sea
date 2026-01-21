@@ -37,7 +37,7 @@ Most agent frameworks are heavy, Python-first, or tightly coupled to specific pr
 
 ### Option 1: Download Binary (Recommended)
 
-1. Go to the [Releases](https://github.com/lucas-zan/sea/releases) page.
+1. Go to the [Releases](https://github.com/lucas-zan/agent-sea/releases) page.
 2. Download the binary for your OS (Windows, macOS, Linux).
 3. Rename it to `sea` (or `sea.exe` on Windows) and make it executable:
    ```bash
@@ -50,8 +50,8 @@ Most agent frameworks are heavy, Python-first, or tightly coupled to specific pr
 This project requires Go 1.24+.
 
 ```bash
-git clone https://github.com/lucas-zan/sea.git
-cd sea
+git clone https://github.com/lucas-zan/agent-sea.git
+cd agent-sea
 make native
 # Output: ./sea
 ```
