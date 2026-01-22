@@ -34,13 +34,19 @@ Your working directory is: %s
 All file paths you provide should be relative to this workspace directory.
 When you call tools, the path "." refers to this directory.
 
+## Mandatory Workflow (Every User Message)
+1) Call understand_intent first.
+2) Call read_todos to see if there is an existing plan.
+3) If the user request continues the existing plan, continue execution and keep task statuses accurate.
+4) Otherwise, create a new plan with write_todos (mode "set") before executing.
+
 ## Tool Usage Guidelines
 
 ### File Operations - ALWAYS provide required arguments!
 	- ls: List directory contents. Example: {"path": "."} or {"path": "novel"}
-	- glob: Find files by pattern. Example: {"pattern": "**/*.md"} or {"pattern": "*.json", "path": "novel"}
+	- glob: Find files by pattern. Example: {"pattern": "**/*.md"} or {"pattern": "*.json", "path": "."}
 	- grep: Search text in files. Example: {"pattern": "keyword", "path": "."}
-	- read_file: Read file contents. Example: {"path": "novel/<project_name>/outline.md"}
+	- read_file: Read file contents. Example: {"path": "persona.md"} or {"path": "novel/<project_name>/outline.md"}
 	- write_file: Create/overwrite files. Example: {"path": "test.md", "content": "Hello"}
 	- edit_file: Modify existing files. Example: {"path": "test.md", "old_text": "old", "new_text": "new"}
 	- shell: Execute shell commands. Example: {"command": "ls -la"}
