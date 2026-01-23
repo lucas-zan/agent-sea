@@ -8,6 +8,7 @@ import (
 
 	"AgentEngine/pkg/engine/api"
 	"AgentEngine/pkg/engine/policy"
+	"AgentEngine/pkg/engine/skill"
 	"AgentEngine/pkg/engine/store"
 )
 
@@ -23,6 +24,7 @@ type EngineConfig struct {
 	Middlewares []Middleware
 
 	WorkspaceRoot string
+	SkillIndex    skill.SkillIndex
 
 	// Optional stores. If nil, file-backed stores under <WorkspaceRoot>/workspace/ will be used.
 	SessionStore store.SessionStore
@@ -103,6 +105,11 @@ func (e *Engine) StartSession(ctx context.Context, opts api.StartOptions) (strin
 	}
 	if opts.EmitThinking {
 		metadata["emit_thinking"] = "true"
+	}
+	if opts.ActiveSkill != "" {
+		metadata["skill_locked"] = "true"
+		metadata["skill_source"] = "cli"
+		metadata["skill_last_reason"] = "start_options"
 	}
 
 	session := &api.Session{
@@ -254,6 +261,7 @@ func (e *Engine) Send(ctx context.Context, sessionID, message string) (api.Event
 		EventLog:              e.eventLog,
 		Middlewares:           e.cfg.Middlewares,
 		WorkspaceRoot:         e.cfg.WorkspaceRoot,
+		SkillIndex:            e.cfg.SkillIndex,
 		ApprovalMode:          approvalMode,
 		EmitThinking:          emitThinking,
 		AutoCompressThreshold: e.cfg.AutoCompressThreshold,
@@ -341,6 +349,7 @@ func (e *Engine) Resume(ctx context.Context, sessionID string, decision api.Deci
 		EventLog:              e.eventLog,
 		Middlewares:           e.cfg.Middlewares,
 		WorkspaceRoot:         e.cfg.WorkspaceRoot,
+		SkillIndex:            e.cfg.SkillIndex,
 		ApprovalMode:          approvalMode,
 		EmitThinking:          emitThinking,
 		AutoCompressThreshold: e.cfg.AutoCompressThreshold,

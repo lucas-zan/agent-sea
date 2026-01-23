@@ -13,6 +13,7 @@ import (
 
 	"AgentEngine/pkg/engine/api"
 	"AgentEngine/pkg/engine/policy"
+	"AgentEngine/pkg/engine/skill"
 	"AgentEngine/pkg/engine/store"
 	"AgentEngine/pkg/engine/tools"
 	"AgentEngine/pkg/logger"
@@ -97,6 +98,7 @@ type TurnRunnerConfig struct {
 	Middlewares  []Middleware
 
 	WorkspaceRoot string
+	SkillIndex    skill.SkillIndex
 	ApprovalMode  api.ApprovalMode
 	EmitThinking  bool
 
@@ -245,6 +247,9 @@ func (r *TurnRunner) runTurn(ctx context.Context, message string) {
 		}
 	}
 
+	// Auto skill routing (best-effort): set session.ActiveSkill before building system prompt.
+	r.maybeRouteSkill(ctx, message)
+
 	// Save session
 	if err := r.saveSession(ctx); err != nil {
 		r.emitError(ctx, api.ErrStoreError, err.Error())
@@ -392,9 +397,15 @@ func (r *TurnRunner) resumeTurn(ctx context.Context, decision api.Decision) {
 	r.session.Messages = append(r.session.Messages, toolMsg)
 
 	// Clear pending
+	stopAfter := pending.StopAfter
 	r.session.Pending = nil
 	if err := r.saveSession(ctx); err != nil {
 		r.emitError(ctx, api.ErrStoreError, err.Error())
+		return
+	}
+
+	if stopAfter {
+		r.emitDone(ctx, "completed")
 		return
 	}
 
@@ -537,6 +548,12 @@ func (r *TurnRunner) agentLoop(ctx context.Context, state *api.State) (loopOutco
 				}
 			}
 			r.assistantText = assistantContent
+
+			// Skill-driven auto-persist (best-effort): if the active skill requires
+			// saving output and the model didn't call tools, propose a write.
+			if outcome, did, err := r.maybeAutoSaveSkillOutput(ctx, state, lastUserMessage(state.Messages), assistantContent); did {
+				return outcome, err
+			}
 			return loopOutcomeCompleted, nil
 		}
 
@@ -888,6 +905,15 @@ func getAllowedToolsFromState(state *api.State) []string {
 
 func errorsIsContextCanceled(err error) bool {
 	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
+}
+
+func lastUserMessage(messages []api.LLMMessage) string {
+	for i := len(messages) - 1; i >= 0; i-- {
+		if messages[i].Role == "user" {
+			return messages[i].Content
+		}
+	}
+	return ""
 }
 
 func (r *TurnRunner) prepareExecArgs(toolName string, args api.Args) api.Args {

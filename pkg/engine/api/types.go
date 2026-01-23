@@ -131,6 +131,7 @@ type PendingApproval struct {
 	ToolCall  ToolCallPayload `json:"tool_call"`
 	Preview   *Preview        `json:"preview,omitempty"`
 	CreatedAt time.Time       `json:"created_at"`
+	StopAfter bool            `json:"stop_after,omitempty"`
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

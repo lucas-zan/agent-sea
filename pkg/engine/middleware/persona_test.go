@@ -31,8 +31,8 @@ func TestPersonaMiddleware_loadPersona_LayersUserProjectWorkspaceInOrder(t *test
 		t.Fatalf("mkdir workspace: %v", err)
 	}
 
-	userPersonaPath := filepath.Join(home, ".agent-engine", "default", "persona.md")
-	projectPersonaPath := filepath.Join(projectRoot, ".agent-engine", "persona.md")
+	userPersonaPath := filepath.Join(home, ".sea", "default", "persona.md")
+	projectPersonaPath := filepath.Join(projectRoot, ".sea", "persona.md")
 	workspacePersonaPath := filepath.Join(workspaceRoot, "persona.md")
 
 	userPersona := strings.TrimSpace("# User Persona\n- user\n")

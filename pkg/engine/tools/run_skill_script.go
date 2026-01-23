@@ -175,9 +175,19 @@ func (t *RunSkillScriptTool) Execute(ctx context.Context, args api.Args) (api.To
 	cmd := exec.CommandContext(ctx, cmdArgs[0], cmdArgs[1:]...)
 	cmd.Dir = meta.Path
 
+	workspaceDir := t.workspaceRoot
+	if candidate := filepath.Join(t.workspaceRoot, "workspace"); candidate != "" {
+		if info, statErr := os.Stat(candidate); statErr == nil && info.IsDir() {
+			workspaceDir = candidate
+		}
+	}
+	projectRoot := filepath.Dir(workspaceDir)
+
 	// Set environment variables
 	cmd.Env = append(os.Environ(),
-		"WORKSPACE_ROOT="+t.workspaceRoot,
+		"PROJECT_ROOT="+projectRoot,
+		"WORKSPACE_ROOT="+workspaceDir,
+		"AGENT_WORKSPACE="+workspaceDir,
 		"SKILL_PATH="+meta.Path,
 		"SKILL_NAME="+meta.Name,
 	)

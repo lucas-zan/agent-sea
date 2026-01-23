@@ -45,7 +45,14 @@ func (m *SkillsMiddleware) BeforeTurn(ctx context.Context, state *api.State) err
 --- END SKILL ---
 `, sk.Name, sk.Content)
 
-	state.SystemPrompt = state.SystemPrompt + skillPrompt
+	execRules := `
+--- SKILL EXECUTION RULES ---
+- Follow the active skill's workflow exactly.
+- If the workflow says to create/update/save files, you MUST use tools (e.g. write_file/edit_file/run_skill_script). Do not just describe what you would do.
+--- END SKILL EXECUTION RULES ---
+`
+
+	state.SystemPrompt = state.SystemPrompt + skillPrompt + execRules
 
 	// Store allowed-tools in metadata for policy to use
 	if len(sk.AllowedTools) > 0 {

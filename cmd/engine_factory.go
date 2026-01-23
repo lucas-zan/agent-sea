@@ -139,6 +139,7 @@ func newAPIEngine(workspaceRoot string) (api.Engine, error) {
 		Policy:                policy.NewDefaultPolicy(),
 		Middlewares:           []runtime.Middleware{mw.NewPersonaMiddleware(workspaceRoot, filepath.Dir(workspaceRoot), agentFlag), mw.NewBasePromptMiddleware(workspaceRoot), mw.NewSkillsMiddleware(skillIndex), mw.NewMemoryMiddleware(mem), mw.NewPlanningMiddleware(planStore)},
 		WorkspaceRoot:         workspaceRoot,
+		SkillIndex:            skillIndex,
 		SessionStore:          sessionStore,
 		PlanStore:             planStore,
 		EventLog:              eventLog,
